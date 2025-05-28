@@ -2,7 +2,7 @@ pipeline {
     agent any 
 
     tools { 
-        maven 'maven' // Make sure this matches the Maven name in Jenkins global tools 
+        maven 'maven' // Ensure this matches the Maven tool name in Jenkins global config 
     } 
 
     environment { 
@@ -56,7 +56,7 @@ pipeline {
             } 
         } 
 
-              stage("Push to Docker Hub") { 
+        stage("Push to Docker Hub") { 
             steps { 
                 withCredentials([usernamePassword(credentialsId: 'vasim', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) { 
                     sh ''' 
@@ -76,13 +76,12 @@ pipeline {
             } 
         } 
 
-
         stage("Remove Docker Image Locally") { 
             steps { 
-                sh """ 
-                docker rmi -f ${DOCKERHUB_USERNAME}/web2 || true 
-                docker rmi -f web2 || true 
-                """ 
+                sh ''' 
+                    docker rmi -f ${DOCKERHUB_USERNAME}/web2 || true 
+                    docker rmi -f web2 || true 
+                ''' 
             } 
             post { 
                 success { 
@@ -96,10 +95,10 @@ pipeline {
 
         stage("Stop and Restart Container") { 
             steps { 
-                sh """ 
-                docker rm -f app || true 
-                docker run -d --name app -p 8081:8080 ${DOCKERHUB_USERNAME}/web2 
-                """ 
+                sh ''' 
+                    docker rm -f app || true 
+                    docker run -d --name app -p 8081:8080 ${DOCKERHUB_USERNAME}/web2 
+                ''' 
             } 
             post { 
                 success { 
@@ -118,6 +117,6 @@ pipeline {
         } 
         failure { 
             echo "Deployment failed" 
-        } 
-    } 
+        } 
+    } 
 }
